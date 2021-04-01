@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_cupertinopicker/picker_style.dart';
-import 'package:flutter_cupertinopicker/transition_shield.dart';
+import 'package:flutter_cupertinopicker/picker_detail.dart';
+import 'package:flutter_cupertinopicker/trans_shield.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ Future<Widget> showCustomDatePicker(
     Color titleBgColor,
     Color backgroundColor,
     DateTime initialDate,
-    @required void Function(String) onConfirm}) async {
+    @required void Function(String,int,int,int) onConfirm}) async {
   if (context == null) {
     print("context must not be null!!!");
   }
@@ -154,7 +154,7 @@ Future<Widget> showCustomDatePicker(
                           }
                           if (onConfirm != null) {
                             onConfirm(
-                                "${_birthYear.toString()}年$monthString月$dateString日");
+                                "${_birthYear.toString()}年$monthString月$dateString日",_birthYear,_birthMonth,_birthDate);
                           }
 
                           Navigator.of(context).pop();
@@ -181,7 +181,7 @@ Future<Widget> showCustomDatePicker(
                     SizedBox(
                       width: screenUtil.setHeight(30.0),
                     ),
-                    PickerStyle(
+                    PickerDetail(
                         screenUtil: screenUtil,
                         textColor: textColor,
                         controller: scrollControllerYear,
@@ -209,7 +209,7 @@ Future<Widget> showCustomDatePicker(
                               monthNum,
                               dateNum);
                         }),
-                    PickerStyle(
+                    PickerDetail(
                         screenUtil: screenUtil,
                         textColor: textColor,
                         controller: scrollControllerMonth,
@@ -234,7 +234,7 @@ Future<Widget> showCustomDatePicker(
                               monthNum,
                               dateNum);
                         }),
-                    PickerStyle(
+                    PickerDetail(
                         screenUtil: screenUtil,
                         textColor: textColor,
                         controller: scrollControllerDate,
@@ -261,7 +261,7 @@ Future<Widget> showCustomDatePicker(
                         }),
                     SizedBox(width: screenUtil.setHeight(30.0)),
                   ]),
-                  TransitionShield(
+                  TransShield(
                       screenUtil: screenUtil,
                       direction1: Alignment.topCenter,
                       direction2: Alignment.bottomCenter,
@@ -269,7 +269,7 @@ Future<Widget> showCustomDatePicker(
                           Color.fromRGBO(245, 245, 245, 1)),
                   Positioned(
                       bottom: 0.0,
-                      child: TransitionShield(
+                      child: TransShield(
                         screenUtil: screenUtil,
                         direction1: Alignment.bottomCenter,
                         direction2: Alignment.topCenter,

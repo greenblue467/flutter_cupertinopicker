@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
-class TransitionShield extends StatelessWidget {
+class TransShield extends StatelessWidget {
   final ScreenUtil screenUtil;
   final direction1;
   final direction2;
 
   final Color shieldColor;
 
-  TransitionShield(
+  TransShield(
       {@required this.screenUtil,
       @required this.direction1,
       @required this.direction2,

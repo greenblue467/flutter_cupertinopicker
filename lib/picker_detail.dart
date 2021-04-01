@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 
-class PickerStyle extends StatelessWidget {
+class PickerDetail extends StatelessWidget {
   final ScreenUtil screenUtil;
   final Color textColor;
   final FixedExtentScrollController controller;
@@ -11,7 +11,7 @@ class PickerStyle extends StatelessWidget {
   final List<Center> display;
   final Function method;
 
-  PickerStyle(
+  PickerDetail(
       {@required this.screenUtil,
       this.textColor,
       @required this.controller,
