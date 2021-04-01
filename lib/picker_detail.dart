@@ -28,7 +28,7 @@ class PickerDetail extends StatelessWidget {
         data: CupertinoThemeData(
           textTheme: CupertinoTextThemeData(
             pickerTextStyle: TextStyle(
-              color: textColor ?? Color.fromRGBO(101, 101, 101, 1),
+              color: textColor,
               fontSize: screenUtil.setWidth(25.0) > screenUtil.setHeight(22.0)
                   ? screenUtil.setHeight(22.0)
                   : screenUtil.setWidth(25.0),

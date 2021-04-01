@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_cupertinopicker/picker_detail.dart';
-import 'package:flutter_cupertinopicker/trans_shield.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter/material.dart';
 
@@ -11,11 +10,13 @@ Future<Widget> showCustomDatePicker(
     double adaptHeight = 736.0,
     Color cancelColor,
     Color confirmColor,
-    Color textColor,
     Color titleBgColor,
-    Color backgroundColor,
     DateTime initialDate,
-    @required void Function(String,int,int,int) onConfirm}) async {
+    bool restrict = false,
+    bool isDarkMode = false,
+    @required void Function(String, int, int, int) onConfirm}) async {
+  ///restrict is for preventing users from choosing future date, the default is false
+
   if (context == null) {
     print("context must not be null!!!");
   }
@@ -106,20 +107,114 @@ Future<Widget> showCustomDatePicker(
       FixedExtentScrollController(initialItem: indexMonth);
   FixedExtentScrollController scrollControllerDate =
       FixedExtentScrollController(initialItem: indexDate);
-
-
+  Color _shield = isDarkMode ? Colors.black : Color.fromRGBO(245, 245, 245, 1);
   return showModalBottomSheet(
       enableDrag: false,
       context: context,
       builder: (context) {
+        Widget child = Container(
+          color: isDarkMode ? _shield : Colors.white,
+          child: Row(children: [
+            SizedBox(
+              width: screenUtil.setHeight(30.0),
+            ),
+            PickerDetail(
+                screenUtil: screenUtil,
+                textColor: isDarkMode
+                    ? Colors.white.withOpacity(0.8)
+                    : Color.fromRGBO(101, 101, 101, 1),
+                controller: scrollControllerYear,
+                expand: 2,
+                curveAmount: -0.3,
+                display: year,
+                method: (index) {
+                  _birthYear = yearNum[index];
+                  _checkLeap(screenUtil, leapYear, _birthDate,
+                      scrollControllerDate, yearNum[index], _birthMonth);
+                  if (restrict) {
+                    _checkExceed(
+                        screenUtil,
+                        yearNum[index],
+                        _birthMonth,
+                        _birthDate,
+                        scrollControllerYear,
+                        scrollControllerMonth,
+                        scrollControllerDate,
+                        yearNum,
+                        monthNum,
+                        dateNum);
+                  }
+                }),
+            PickerDetail(
+                screenUtil: screenUtil,
+                textColor: isDarkMode
+                    ? Colors.white.withOpacity(0.8)
+                    : Color.fromRGBO(101, 101, 101, 1),
+                controller: scrollControllerMonth,
+                expand: 1,
+                curveAmount: 0.0,
+                display: month,
+                method: (index) {
+                  _birthMonth = monthNum[index];
+                  _checkLeap(screenUtil, leapYear, _birthDate,
+                      scrollControllerDate, _birthYear, _birthMonth);
+                  _checkLunar(screenUtil, lunarMonth, _birthDate,
+                      scrollControllerDate, _birthMonth);
+                  if (restrict) {
+                    _checkExceed(
+                        screenUtil,
+                        _birthYear,
+                        monthNum[index],
+                        _birthDate,
+                        scrollControllerYear,
+                        scrollControllerMonth,
+                        scrollControllerDate,
+                        yearNum,
+                        monthNum,
+                        dateNum);
+                  }
+                }),
+            PickerDetail(
+                screenUtil: screenUtil,
+                textColor: isDarkMode
+                    ? Colors.white.withOpacity(0.8)
+                    : Color.fromRGBO(101, 101, 101, 1),
+                controller: scrollControllerDate,
+                expand: 2,
+                curveAmount: 0.3,
+                display: date,
+                method: (index) {
+                  _checkLeap(screenUtil, leapYear, dateNum[index],
+                      scrollControllerDate, _birthYear, _birthMonth);
+                  _checkLunar(screenUtil, lunarMonth, dateNum[index],
+                      scrollControllerDate, _birthMonth);
+                  if (restrict) {
+                    _checkExceed(
+                        screenUtil,
+                        _birthYear,
+                        _birthMonth,
+                        dateNum[index],
+                        scrollControllerYear,
+                        scrollControllerMonth,
+                        scrollControllerDate,
+                        yearNum,
+                        monthNum,
+                        dateNum);
+                  }
+
+                  _birthDate = dateNum[index];
+                }),
+            SizedBox(width: screenUtil.setHeight(30.0)),
+          ]),
+        );
         return MediaQuery(
           data: mediaQuery.copyWith(textScaleFactor: 1.0),
-          child: Container(
-            color: backgroundColor ?? Color.fromRGBO(245, 245, 245, 1),
+          child: SizedBox(
             height: screenUtil.setHeight(300.0),
             child: Column(children: [
               Container(
-                color: titleBgColor ?? Colors.white,
+                color: titleBgColor ??
+                    (isDarkMode ? Color.fromRGBO(10, 10, 10, 1) : Colors.white),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -135,7 +230,9 @@ Future<Widget> showCustomDatePicker(
                               "取消",
                               style: TextStyle(
                                   color: cancelColor ??
-                                      Color.fromRGBO(204, 204, 204, 1),
+                                      (isDarkMode
+                                          ? Colors.white.withOpacity(0.4)
+                                          : Color.fromRGBO(204, 204, 204, 1)),
                                   fontSize: screenUtil.setHeight(15.5)),
                             ))),
                     GestureDetector(
@@ -154,7 +251,10 @@ Future<Widget> showCustomDatePicker(
                           }
                           if (onConfirm != null) {
                             onConfirm(
-                                "${_birthYear.toString()}年$monthString月$dateString日",_birthYear,_birthMonth,_birthDate);
+                                "${_birthYear.toString()}年$monthString月$dateString日",
+                                _birthYear,
+                                _birthMonth,
+                                _birthDate);
                           }
 
                           Navigator.of(context).pop();
@@ -166,7 +266,10 @@ Future<Widget> showCustomDatePicker(
                             child: Text(
                               "確定",
                               style: TextStyle(
-                                  color: confirmColor ?? theme.primaryColor,
+                                  color: confirmColor ??
+                                      (isDarkMode
+                                          ? Colors.white
+                                          : theme.primaryColor),
                                   fontSize: screenUtil.setHeight(15.5)),
                             ))),
                     SizedBox(
@@ -176,107 +279,24 @@ Future<Widget> showCustomDatePicker(
                 ),
               ),
               Expanded(
-                child: Stack(children: [
-                  Row(children: [
-                    SizedBox(
-                      width: screenUtil.setHeight(30.0),
-                    ),
-                    PickerDetail(
-                        screenUtil: screenUtil,
-                        textColor: textColor,
-                        controller: scrollControllerYear,
-                        expand: 2,
-                        curveAmount: -0.3,
-                        display: year,
-                        method: (index) {
-                          _birthYear = yearNum[index];
-                          _checkLeap(
-                              screenUtil,
-                              leapYear,
-                              _birthDate,
-                              scrollControllerDate,
-                              yearNum[index],
-                              _birthMonth);
-                          _checkExceed(
-                              screenUtil,
-                              yearNum[index],
-                              _birthMonth,
-                              _birthDate,
-                              scrollControllerYear,
-                              scrollControllerMonth,
-                              scrollControllerDate,
-                              yearNum,
-                              monthNum,
-                              dateNum);
-                        }),
-                    PickerDetail(
-                        screenUtil: screenUtil,
-                        textColor: textColor,
-                        controller: scrollControllerMonth,
-                        expand: 1,
-                        curveAmount: 0.0,
-                        display: month,
-                        method: (index) {
-                          _birthMonth = monthNum[index];
-                          _checkLeap(screenUtil, leapYear, _birthDate,
-                              scrollControllerDate, _birthYear, _birthMonth);
-                          _checkLunar(screenUtil, lunarMonth, _birthDate,
-                              scrollControllerDate, _birthMonth);
-                          _checkExceed(
-                              screenUtil,
-                              _birthYear,
-                              monthNum[index],
-                              _birthDate,
-                              scrollControllerYear,
-                              scrollControllerMonth,
-                              scrollControllerDate,
-                              yearNum,
-                              monthNum,
-                              dateNum);
-                        }),
-                    PickerDetail(
-                        screenUtil: screenUtil,
-                        textColor: textColor,
-                        controller: scrollControllerDate,
-                        expand: 2,
-                        curveAmount: 0.3,
-                        display: date,
-                        method: (index) {
-                          _checkLeap(screenUtil, leapYear, dateNum[index],
-                              scrollControllerDate, _birthYear, _birthMonth);
-                          _checkLunar(screenUtil, lunarMonth, dateNum[index],
-                              scrollControllerDate, _birthMonth);
-                          _checkExceed(
-                              screenUtil,
-                              _birthYear,
-                              _birthMonth,
-                              dateNum[index],
-                              scrollControllerYear,
-                              scrollControllerMonth,
-                              scrollControllerDate,
-                              yearNum,
-                              monthNum,
-                              dateNum);
-                          _birthDate = dateNum[index];
-                        }),
-                    SizedBox(width: screenUtil.setHeight(30.0)),
-                  ]),
-                  TransShield(
-                      screenUtil: screenUtil,
-                      direction1: Alignment.topCenter,
-                      direction2: Alignment.bottomCenter,
-                      shieldColor: backgroundColor ??
-                          Color.fromRGBO(245, 245, 245, 1)),
-                  Positioned(
-                      bottom: 0.0,
-                      child: TransShield(
-                        screenUtil: screenUtil,
-                        direction1: Alignment.bottomCenter,
-                        direction2: Alignment.topCenter,
-                        shieldColor: backgroundColor ??
-                            Color.fromRGBO(245, 245, 245, 1),
-                      )),
-                ]),
+                child: isDarkMode
+                    ? child
+                    : ShaderMask(
+                        shaderCallback: (rect) => LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            tileMode: TileMode.clamp,
+                            colors: [
+                              _shield.withOpacity(0.0),
+                              _shield.withOpacity(0.2),
+                              _shield.withOpacity(0.8),
+                              _shield.withOpacity(1.0),
+                              _shield.withOpacity(0.8),
+                              _shield.withOpacity(0.2),
+                              _shield.withOpacity(0.0),
+                            ]).createShader(rect),
+                        child: child,
+                      ),
               ),
             ]),
           ),

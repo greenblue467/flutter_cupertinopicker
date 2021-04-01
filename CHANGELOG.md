@@ -9,3 +9,11 @@
 ## [0.0.3] - Modify onConfirm method.
 
 * TODO: Describe initial release.
+
+## [0.0.4] - Modify fading range.
+
+* TODO: Describe initial release.
+
+## [0.0.5] - Modify styling.
+
+* TODO: Describe initial release.
