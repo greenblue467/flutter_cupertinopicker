@@ -8,6 +8,8 @@ Future<Widget> showCustomDatePicker(
     {@required BuildContext context,
     double adaptWidth = 414.0,
     double adaptHeight = 736.0,
+    double textScale = 1.0,
+    bool textWeightBold = false,
     Color cancelColor,
     Color confirmColor,
     Color titleBgColor,
@@ -208,7 +210,8 @@ Future<Widget> showCustomDatePicker(
           ]),
         );
         return MediaQuery(
-          data: mediaQuery.copyWith(textScaleFactor: 1.0),
+          data: mediaQuery.copyWith(
+              textScaleFactor: textScale, boldText: textWeightBold),
           child: SizedBox(
             height: screenUtil.setHeight(300.0),
             child: Column(children: [

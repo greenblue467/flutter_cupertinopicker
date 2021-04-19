@@ -17,3 +17,7 @@
 ## [0.0.5] - Modify styling.
 
 * TODO: Describe initial release.
+
+## [0.0.6] - Adding default text size and weight.
+
+* TODO: Describe initial release.
