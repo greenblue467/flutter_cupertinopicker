@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 
 class PickerDetail extends StatelessWidget {
   final ScreenUtil screenUtil;
-  final Color textColor;
+  final Color? textColor;
   final FixedExtentScrollController controller;
   final int expand;
   final double curveAmount;
@@ -12,13 +13,13 @@ class PickerDetail extends StatelessWidget {
   final Function method;
 
   PickerDetail(
-      {@required this.screenUtil,
+      {required this.screenUtil,
       this.textColor,
-      @required this.controller,
-      @required this.expand,
-      @required this.curveAmount,
-      @required this.display,
-      @required this.method});
+      required this.controller,
+      required this.expand,
+      required this.curveAmount,
+      required this.display,
+      required this.method});
 
   @override
   Widget build(BuildContext context) {

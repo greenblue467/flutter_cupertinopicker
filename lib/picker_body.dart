@@ -1,28 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_cupertinopicker/picker_detail.dart';
-import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-Future<Widget> showCustomDatePicker(
-    {@required BuildContext context,
+Future<Widget?> showCustomDatePicker(
+    {required BuildContext context,
     double adaptWidth = 414.0,
     double adaptHeight = 736.0,
     double textScale = 1.0,
     bool textWeightBold = false,
-    Color cancelColor,
-    Color confirmColor,
-    Color titleBgColor,
-    DateTime initialDate,
+    Color? cancelColor,
+    Color? confirmColor,
+    Color? titleBgColor,
+    DateTime? initialDate,
     bool restrict = false,
     bool isDarkMode = false,
-    @required void Function(String, int, int, int) onConfirm}) async {
+    required void Function(String, int, int, int) onConfirm}) async {
   ///restrict is for preventing users from choosing future date, the default is false
 
-  if (context == null) {
-    print("context must not be null!!!");
-  }
-  assert(context != null);
 
   int birthYear;
   int birthMonth;
@@ -38,7 +34,9 @@ Future<Widget> showCustomDatePicker(
   }
 
   final mediaQuery = MediaQuery.of(context);
-  ScreenUtil.init(context, width: adaptWidth, height: adaptHeight);
+  ScreenUtil.init(
+      BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: MediaQuery.of(context).size.height),
+      designSize: Size(adaptWidth, adaptHeight));
   final ScreenUtil screenUtil = ScreenUtil();
   final theme = Theme.of(context);
 
@@ -46,11 +44,11 @@ Future<Widget> showCustomDatePicker(
   int _birthMonth = birthMonth;
   int _birthDate = birthDate;
   int thisYear = DateTime.now().year.toInt();
-  List<int> yearNum = List<int>();
-  List<int> leapYear = List<int>();
-  List<int> monthNum = List<int>();
-  List<int> lunarMonth = List<int>();
-  List<int> dateNum = List<int>();
+  List<int> yearNum = [];
+  List<int> leapYear = [];
+  List<int> monthNum = [];
+  List<int> lunarMonth = [];
+  List<int> dateNum = [];
 
   ///starts from 1900/01/01
   for (var i = 1900; i <= thisYear; i++) {
@@ -83,9 +81,7 @@ Future<Widget> showCustomDatePicker(
     dateNum.add(i);
   }
 
-  List<Center> year = yearNum
-      .map((each) => Center(child: Text("${each.toString()}年")))
-      .toList();
+  List<Center> year = yearNum.map((each) => Center(child: Text("${each.toString()}年"))).toList();
   List<Center> month = monthNum.map((each) {
     if (each < 10) {
       return Center(child: Text("0${each.toString()}月"));
@@ -103,12 +99,9 @@ Future<Widget> showCustomDatePicker(
   int indexMonth = monthNum.indexOf(birthMonth);
   int indexDate = dateNum.indexOf(birthDate);
 
-  FixedExtentScrollController scrollControllerYear =
-      FixedExtentScrollController(initialItem: indexYear);
-  FixedExtentScrollController scrollControllerMonth =
-      FixedExtentScrollController(initialItem: indexMonth);
-  FixedExtentScrollController scrollControllerDate =
-      FixedExtentScrollController(initialItem: indexDate);
+  FixedExtentScrollController scrollControllerYear = FixedExtentScrollController(initialItem: indexYear);
+  FixedExtentScrollController scrollControllerMonth = FixedExtentScrollController(initialItem: indexMonth);
+  FixedExtentScrollController scrollControllerDate = FixedExtentScrollController(initialItem: indexDate);
   Color _shield = isDarkMode ? Colors.black : Color.fromRGBO(245, 245, 245, 1);
   return showModalBottomSheet(
       enableDrag: false,
@@ -122,86 +115,48 @@ Future<Widget> showCustomDatePicker(
             ),
             PickerDetail(
                 screenUtil: screenUtil,
-                textColor: isDarkMode
-                    ? Colors.white.withOpacity(0.8)
-                    : Color.fromRGBO(101, 101, 101, 1),
+                textColor: isDarkMode ? Colors.white.withOpacity(0.8) : Color.fromRGBO(101, 101, 101, 1),
                 controller: scrollControllerYear,
                 expand: 2,
                 curveAmount: -0.3,
                 display: year,
                 method: (index) {
                   _birthYear = yearNum[index];
-                  _checkLeap(screenUtil, leapYear, _birthDate,
-                      scrollControllerDate, yearNum[index], _birthMonth);
+                  _checkLeap(screenUtil, leapYear, _birthDate, scrollControllerDate, yearNum[index], _birthMonth);
                   if (restrict) {
-                    _checkExceed(
-                        screenUtil,
-                        yearNum[index],
-                        _birthMonth,
-                        _birthDate,
-                        scrollControllerYear,
-                        scrollControllerMonth,
-                        scrollControllerDate,
-                        yearNum,
-                        monthNum,
-                        dateNum);
+                    _checkExceed(screenUtil, yearNum[index], _birthMonth, _birthDate, scrollControllerYear,
+                        scrollControllerMonth, scrollControllerDate, yearNum, monthNum, dateNum);
                   }
                 }),
             PickerDetail(
                 screenUtil: screenUtil,
-                textColor: isDarkMode
-                    ? Colors.white.withOpacity(0.8)
-                    : Color.fromRGBO(101, 101, 101, 1),
+                textColor: isDarkMode ? Colors.white.withOpacity(0.8) : Color.fromRGBO(101, 101, 101, 1),
                 controller: scrollControllerMonth,
                 expand: 1,
                 curveAmount: 0.0,
                 display: month,
                 method: (index) {
                   _birthMonth = monthNum[index];
-                  _checkLeap(screenUtil, leapYear, _birthDate,
-                      scrollControllerDate, _birthYear, _birthMonth);
-                  _checkLunar(screenUtil, lunarMonth, _birthDate,
-                      scrollControllerDate, _birthMonth);
+                  _checkLeap(screenUtil, leapYear, _birthDate, scrollControllerDate, _birthYear, _birthMonth);
+                  _checkLunar(screenUtil, lunarMonth, _birthDate, scrollControllerDate, _birthMonth);
                   if (restrict) {
-                    _checkExceed(
-                        screenUtil,
-                        _birthYear,
-                        monthNum[index],
-                        _birthDate,
-                        scrollControllerYear,
-                        scrollControllerMonth,
-                        scrollControllerDate,
-                        yearNum,
-                        monthNum,
-                        dateNum);
+                    _checkExceed(screenUtil, _birthYear, monthNum[index], _birthDate, scrollControllerYear,
+                        scrollControllerMonth, scrollControllerDate, yearNum, monthNum, dateNum);
                   }
                 }),
             PickerDetail(
                 screenUtil: screenUtil,
-                textColor: isDarkMode
-                    ? Colors.white.withOpacity(0.8)
-                    : Color.fromRGBO(101, 101, 101, 1),
+                textColor: isDarkMode ? Colors.white.withOpacity(0.8) : Color.fromRGBO(101, 101, 101, 1),
                 controller: scrollControllerDate,
                 expand: 2,
                 curveAmount: 0.3,
                 display: date,
                 method: (index) {
-                  _checkLeap(screenUtil, leapYear, dateNum[index],
-                      scrollControllerDate, _birthYear, _birthMonth);
-                  _checkLunar(screenUtil, lunarMonth, dateNum[index],
-                      scrollControllerDate, _birthMonth);
+                  _checkLeap(screenUtil, leapYear, dateNum[index], scrollControllerDate, _birthYear, _birthMonth);
+                  _checkLunar(screenUtil, lunarMonth, dateNum[index], scrollControllerDate, _birthMonth);
                   if (restrict) {
-                    _checkExceed(
-                        screenUtil,
-                        _birthYear,
-                        _birthMonth,
-                        dateNum[index],
-                        scrollControllerYear,
-                        scrollControllerMonth,
-                        scrollControllerDate,
-                        yearNum,
-                        monthNum,
-                        dateNum);
+                    _checkExceed(screenUtil, _birthYear, _birthMonth, dateNum[index], scrollControllerYear,
+                        scrollControllerMonth, scrollControllerDate, yearNum, monthNum, dateNum);
                   }
 
                   _birthDate = dateNum[index];
@@ -210,14 +165,12 @@ Future<Widget> showCustomDatePicker(
           ]),
         );
         return MediaQuery(
-          data: mediaQuery.copyWith(
-              textScaleFactor: textScale, boldText: textWeightBold),
+          data: mediaQuery.copyWith(textScaleFactor: textScale, boldText: textWeightBold),
           child: SizedBox(
             height: screenUtil.setHeight(300.0),
             child: Column(children: [
               Container(
-                color: titleBgColor ??
-                    (isDarkMode ? Color.fromRGBO(10, 10, 10, 1) : Colors.white),
+                color: titleBgColor ?? (isDarkMode ? Color.fromRGBO(10, 10, 10, 1) : Colors.white),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -233,9 +186,7 @@ Future<Widget> showCustomDatePicker(
                               "取消",
                               style: TextStyle(
                                   color: cancelColor ??
-                                      (isDarkMode
-                                          ? Colors.white.withOpacity(0.4)
-                                          : Color.fromRGBO(204, 204, 204, 1)),
+                                      (isDarkMode ? Colors.white.withOpacity(0.4) : Color.fromRGBO(204, 204, 204, 1)),
                                   fontSize: screenUtil.setHeight(15.5)),
                             ))),
                     GestureDetector(
@@ -253,10 +204,7 @@ Future<Widget> showCustomDatePicker(
                             dateString = _birthDate.toString();
                           }
                           if (onConfirm != null) {
-                            onConfirm(
-                                "${_birthYear.toString()}年$monthString月$dateString日",
-                                _birthYear,
-                                _birthMonth,
+                            onConfirm("${_birthYear.toString()}年$monthString月$dateString日", _birthYear, _birthMonth,
                                 _birthDate);
                           }
 
@@ -269,10 +217,7 @@ Future<Widget> showCustomDatePicker(
                             child: Text(
                               "確定",
                               style: TextStyle(
-                                  color: confirmColor ??
-                                      (isDarkMode
-                                          ? Colors.white
-                                          : theme.primaryColor),
+                                  color: confirmColor ?? (isDarkMode ? Colors.white : theme.primaryColor),
                                   fontSize: screenUtil.setHeight(15.5)),
                             ))),
                     SizedBox(
@@ -316,35 +261,21 @@ void _checkLeap(
   int birthYear,
   int birthMonth,
 ) {
-  if (!leapYear.contains(birthYear) &&
-      birthMonth == 2 &&
-      (date == 29 || date == 30 || date == 31)) {
-    if (scrollControllerDate.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+  if (!leapYear.contains(birthYear) && birthMonth == 2 && (date == 29 || date == 30 || date == 31)) {
+    if (scrollControllerDate.position.userScrollDirection == ScrollDirection.reverse) {
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     }
-  } else if (leapYear.contains(birthYear) &&
-      birthMonth == 2 &&
-      (date == 30 || date == 31)) {
-    if (scrollControllerDate.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+  } else if (leapYear.contains(birthYear) && birthMonth == 2 && (date == 30 || date == 31)) {
+    if (scrollControllerDate.position.userScrollDirection == ScrollDirection.reverse) {
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     }
   }
 }
@@ -353,17 +284,12 @@ void _checkLeap(
 void _checkLunar(ScreenUtil screenUtil, List<int> lunarMonth, int date,
     FixedExtentScrollController scrollControllerDate, int birthMonth) {
   if (lunarMonth.contains(birthMonth) && date == 31) {
-    if (scrollControllerDate.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+    if (scrollControllerDate.position.userScrollDirection == ScrollDirection.reverse) {
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels + screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
-      scrollControllerDate.animateTo(
-          scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeIn);
+      scrollControllerDate.animateTo(scrollControllerDate.position.pixels - screenUtil.setHeight(35.0),
+          duration: Duration(milliseconds: 300), curve: Curves.easeIn);
     }
   }
 }
@@ -381,28 +307,18 @@ void _checkExceed(
     List<int> monthNum,
     List<int> dateNum) {
   DateTime now = DateTime.now();
-  String month = now.month.toString().length < 2
-      ? "0" + now.month.toString()
-      : now.month.toString();
-  String day = now.day.toString().length < 2
-      ? "0" + now.day.toString()
-      : now.day.toString();
-  String selectMonth = birthMonth.toString().length < 2
-      ? "0" + birthMonth.toString()
-      : birthMonth.toString();
-  String selectDay =
-      date.toString().length < 2 ? "0" + date.toString() : date.toString();
+  String month = now.month.toString().length < 2 ? "0" + now.month.toString() : now.month.toString();
+  String day = now.day.toString().length < 2 ? "0" + now.day.toString() : now.day.toString();
+  String selectMonth = birthMonth.toString().length < 2 ? "0" + birthMonth.toString() : birthMonth.toString();
+  String selectDay = date.toString().length < 2 ? "0" + date.toString() : date.toString();
   String select = birthYear.toString() + selectMonth + selectDay;
   String max = now.year.toString() + month + day;
   if (int.parse(select) > int.parse(max)) {
     int indexY = yearNum.indexOf(now.year);
     int indexM = monthNum.indexOf(now.month);
     int indexD = dateNum.indexOf(now.day);
-    scrollControllerYear.animateToItem(indexY,
-        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-    scrollControllerMonth.animateToItem(indexM,
-        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
-    scrollControllerDate.animateToItem(indexD,
-        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+    scrollControllerYear.animateToItem(indexY, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+    scrollControllerMonth.animateToItem(indexM, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+    scrollControllerDate.animateToItem(indexD, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
   }
 }
