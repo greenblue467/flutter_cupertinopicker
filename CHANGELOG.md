@@ -21,3 +21,7 @@
 ## [0.0.6] - Adding default text size and weight.
 
 * TODO: Describe initial release.
+
+## [1.0.0] - Migrate to null safety.
+
+* TODO: Describe initial release.
