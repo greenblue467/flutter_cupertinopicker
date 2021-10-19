@@ -19,7 +19,6 @@ Future<Widget?> showCustomDatePicker(
     required void Function(String, int, int, int) onConfirm}) async {
   ///restrict is for preventing users from choosing future date, the default is false
 
-
   int birthYear;
   int birthMonth;
   int birthDate;
@@ -81,18 +80,18 @@ Future<Widget?> showCustomDatePicker(
     dateNum.add(i);
   }
 
-  List<Center> year = yearNum.map((each) => Center(child: Text("${each.toString()}年"))).toList();
+  List<Center> year = yearNum.map((each) => Center(child: Text("$each年"))).toList();
   List<Center> month = monthNum.map((each) {
     if (each < 10) {
-      return Center(child: Text("0${each.toString()}月"));
+      return Center(child: Text("0$each月"));
     }
-    return Center(child: Text("${each.toString()}月"));
+    return Center(child: Text("$each月"));
   }).toList();
   List<Center> date = dateNum.map((each) {
     if (each < 10) {
-      return Center(child: Text("0${each.toString()}日"));
+      return Center(child: Text("0$each日"));
     }
-    return Center(child: Text("${each.toString()}日"));
+    return Center(child: Text("$each日"));
   }).toList();
 
   int indexYear = yearNum.indexOf(birthYear);
@@ -111,7 +110,7 @@ Future<Widget?> showCustomDatePicker(
           color: isDarkMode ? _shield : Colors.white,
           child: Row(children: [
             SizedBox(
-              width: screenUtil.setHeight(30.0),
+              width: screenUtil.setHeight(16.0),
             ),
             PickerDetail(
                 screenUtil: screenUtil,
@@ -119,6 +118,7 @@ Future<Widget?> showCustomDatePicker(
                 controller: scrollControllerYear,
                 expand: 2,
                 curveAmount: -0.3,
+                leftRadius: screenUtil.setWidth(10.0),
                 display: year,
                 method: (index) {
                   _birthYear = yearNum[index];
@@ -150,6 +150,7 @@ Future<Widget?> showCustomDatePicker(
                 controller: scrollControllerDate,
                 expand: 2,
                 curveAmount: 0.3,
+                rightRadius: screenUtil.setWidth(10.0),
                 display: date,
                 method: (index) {
                   _checkLeap(screenUtil, leapYear, dateNum[index], scrollControllerDate, _birthYear, _birthMonth);
@@ -161,7 +162,7 @@ Future<Widget?> showCustomDatePicker(
 
                   _birthDate = dateNum[index];
                 }),
-            SizedBox(width: screenUtil.setHeight(30.0)),
+            SizedBox(width: screenUtil.setHeight(16.0)),
           ]),
         );
         return MediaQuery(
@@ -203,10 +204,10 @@ Future<Widget?> showCustomDatePicker(
                           } else {
                             dateString = _birthDate.toString();
                           }
-                          if (onConfirm != null) {
+
                             onConfirm("${_birthYear.toString()}年$monthString月$dateString日", _birthYear, _birthMonth,
                                 _birthDate);
-                          }
+
 
                           Navigator.of(context).pop();
                         },
@@ -221,7 +222,7 @@ Future<Widget?> showCustomDatePicker(
                                   fontSize: screenUtil.setHeight(15.5)),
                             ))),
                     SizedBox(
-                      width: screenUtil.setWidth(5.0),
+                      width: screenUtil.setHeight(5.0),
                     )
                   ],
                 ),
